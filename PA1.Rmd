@@ -1,0 +1,91 @@
+COURSERA-Reproducible Research Course Project 1
+===============================================
+
+Name: Christoph Thommen
+Date: 17.10.2015
+Data: The dataset contains information about the number of steps taken by 
+an individual collected during October and November 2012 in a 5 minute interval.
+The following variables are collected:
+steps: Number of steps taking in a 5-minute interval (missing values are coded as NA)
+date: The date on which the measurement was taken in YYYY-MM-DD format
+interval: Identifier for the 5-minute interval in which measurement was taken
+
+The dataset is stored in a comma-separated-value (CSV) file and there are a total of 17,568 observations in this dataset.
+
+##Loading and preprocessing the data
+
+```{r}
+raw_data = read.csv("activity.csv")
+```
+
+```{r}
+raw_data$date=as.date(raw_data$date)
+```
+#stimmt nicht -> checken
+
+##What is mean total number of steps taken per day?
+
+```{r}
+result1=aggregate(raw_data$steps,by=list(raw_data$date),sum)
+dimnames(result1)[[2]]=c("date","steps")
+```
+
+```{r}
+hist(result1$steps)
+```
+
+```{r}
+mean(result1$steps,na.rm=T)
+median(result1$steps,na.rm=T)
+```
+#What is the average daily activity pattern?
+
+```{r}
+plot(result1$steps,type="l")
+```
+
+```{r}
+result1[max(result1$steps,na.rm=T),]$date
+```
+#checken -> stimmt nicht
+
+##Imputing missing values
+
+```{r}
+table(is.na(raw_data$steps)==T)
+table(is.na(raw_data==T))
+```
+
+```{r}
+result2=aggregate(raw_data$steps,by=list(raw_data$interval),mean,na.rm=T)
+result2$steps=round(result2$steps,0)
+dimnames(result2)[[2]]=c("interval","steps")
+```
+
+raw_data_imp=raw_data[is.na(raw_data$steps)==T,]
+#raw_data_imp[raw_data_imp$interval==result2$interval,]$steps=result2[raw_data_imp$interval==result2$interval,]$steps
+
+raw_data_imp2=merge(raw_data_imp,result2,by="interval",all.x=T)
+
+raw_data_imp3=raw_data_imp2[,c(1,3,4)]
+dimnames(raw_data_imp3)[[2]]=c("interval","date","steps")
+
+raw_data2=rbind(raw_data[is.na(raw_data$steps)==F,],raw_data_imp3)
+
+
+#raw_data$steps=ifelse(is.na(raw_data$steps)==T,result2[raw_data$interval==result2$interval,]$steps,raw_data$steps)
+hist(raw_data2$steps)
+
+mean(raw_data2$steps,na.rm=T)
+median(raw_data2$steps,na.rm=T)
+
+
+##Are there differences in activity patterns between weekdays and weekends?
+#date als Datum definieren
+raw_data2$weekday=ifelse(raw_data2$weekdays %in% c("Sunday","Saturday"),"weekend","weekday")
+
+
+plot(result1$steps,type="l")
+
+
+knit2html("PA1.Rmd")
