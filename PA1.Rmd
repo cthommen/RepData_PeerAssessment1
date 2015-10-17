@@ -8,11 +8,13 @@ Date: 17.10.2015
 Data: The dataset contains information about the number of steps taken by 
 an individual collected during October and November 2012 in a 5 minute 
 interval. The following variables are collected:
-steps: Number of steps taking in a 5-minute interval (missing values are coded as NA)
+steps: Number of steps taking in a 5-minute interval (missing values are coded
+as NA)
 date: The date on which the measurement was taken in YYYY-MM-DD format
 interval: Identifier for the 5-minute interval in which measurement was taken
 
-The dataset is stored in a comma-separated-value (CSV) file and there are a total of 17,568 observations in this dataset.
+The dataset is stored in a comma-separated-value (CSV) file and there are a 
+total of 17,568 observations in this dataset.
 
 ##Loading and preprocessing the data
 
@@ -22,83 +24,149 @@ First of all the data is loaded.
 data = read.csv("activity.csv")
 ```
 
-The data is then preprocessed such that the variable date appears in the date-format.
+The data is then preprocessed such that the variable date appears in the 
+date-format.
 
 ```{r}
-data$date=strptime(data$date,"%Y-%m-%d")
-
+data$date=as.Date(data$date)
 ```
 
 ##What is mean total number of steps taken per day?
 
-The mean of steps taken by the individual is aggregated on a daily base, with the aggregate function.
+The sum of steps taken by the individual is aggregated on a daily base, 
+with the aggregate function.
 The variables of the resulting table are then renamed.
 
 ```{r}
-result1=aggregate(raw_data$steps,by=list(raw_data$date),mean)
+result1=aggregate(data$steps,by=list(data$date),sum,na.rm=T)
 dimnames(result1)[[2]]=c("date","steps")
 ```
-
+The result is as follows:
 ```{r}
-hist(result1$steps)
-hist (analysis_data$Global_active_power, col="red",ylab="Frequency",xlab="Global Active Power (kilowatts)",main="Global Active Power")
-
+print(result1)
 ```
 
-```{r}
-mean(result1$steps,na.rm=T)
-median(result1$steps,na.rm=T)
-```
-#What is the average daily activity pattern?
+Visualised in a histogram:
 
 ```{r}
-plot(result1$steps,type="l")
+hist(result1$steps,ylab="Frequency",xlab="Total number of steps per day",
+main="Total number of steps per day")
 ```
 
+The mean of the total number of steps taken is equal to ```{r} mean(result1$steps,na.rm=T)```
+,the median is equal to ```{r} median(result1$steps,na.rm=T)```
+
+##What is the average daily activity pattern?
+
+The mean of steps taken by the individual is calculated for each interval with the aggregate function.
+The variables of the resulting table are then renamed.
+
 ```{r}
-result1[max(result1$steps,na.rm=T),]$date
+result2=aggregate(data$steps,by=list(data$interval),mean,na.rm=T)
+dimnames(result2)[[2]]=c("interval","steps")
 ```
-#checken -> stimmt nicht
+The following plot shows the average daily activity pattern in terms of steps.
+Each interval determines a 5-minute period in a day.
+
+```{r}
+plot(result2$interval,result2$steps,type="l",ylab="Average steps",xlab="Interval",main="Average steps 
+taken per interval across all days")
+```
+The 5-minute interval ```{r} result2[result2$steps==max(result2$steps,na.rm=T),]$interval``` on average across all 
+the days in the dataset, contains the maximum number of steps. 
 
 ##Imputing missing values
 
+The number of missing values is equal to ```{r} table(is.na(data$steps)==T)[2]```,
+which is ```{r} mean(is.na(data$steps)*100)``` % of all observations.
+
+
+The missing values are replaced or imputed by the rounded average interval values across all days.
+therefore the already calculated table of average steps per interval across all days ist taken.
+
 ```{r}
-table(is.na(raw_data$steps)==T)
-table(is.na(raw_data==T))
+result3=result2
+result3$steps=round(result2$steps,0)
+```
+
+In a next step the new dataset is created in a slightly cumbersome way:
+
+1. The part of the data containing missing values is taken.
+```{r}
+data_imp=data[is.na(data$steps)==T,]
+```
+
+2. The part of the data for which values are imputed is then merged with the previously created table
+containing the average number of steps per interval across all days.
+```{r}
+data_imp2=merge(data_imp,result2,by="interval",all.x=T)
+```
+
+3. The values of the average number of steps per interval across all days are then saved in a new object
+while the missing values are skipped.
+```{r}
+data_imp3=data_imp2[,c(1,3,4)]
+dimnames(data_imp3)[[2]]=c("interval","date","steps")
+```
+
+4. The rows with the imputed values are then bound together with the rows without missing values.
+```{r}
+data2=rbind(data[is.na(data$steps)==F,],data_imp3)
 ```
 
 ```{r}
-result2=aggregate(raw_data$steps,by=list(raw_data$interval),mean,na.rm=T)
-result2$steps=round(result2$steps,0)
-dimnames(result2)[[2]]=c("interval","steps")
+result4=aggregate(data2$steps,by=list(data$date),sum,na.rm=T)
+dimnames(result4)[[2]]=c("date","steps")
 ```
 
-raw_data_imp=raw_data[is.na(raw_data$steps)==T,]
-#raw_data_imp[raw_data_imp$interval==result2$interval,]$steps=result2[raw_data_imp$interval==result2$interval,]$steps
+Visualised in a histogram:
 
-raw_data_imp2=merge(raw_data_imp,result2,by="interval",all.x=T)
+```{r}
+hist(result4$steps,ylab="Frequency",xlab="Total number of steps per day",
+main="Total number of steps per day with imputed values")
+```
 
-raw_data_imp3=raw_data_imp2[,c(1,3,4)]
-dimnames(raw_data_imp3)[[2]]=c("interval","date","steps")
+The mean of the total number of steps taken is equal to ```{r} mean(result4$steps,na.rm=T)```,the median
+is equal to ```{r} median(result4$steps,na.rm=T)```. 
 
-raw_data2=rbind(raw_data[is.na(raw_data$steps)==F,],raw_data_imp3)
-
-
-#raw_data$steps=ifelse(is.na(raw_data$steps)==T,result2[raw_data$interval==result2$interval,]$steps,raw_data$steps)
-hist(raw_data2$steps)
-
-mean(raw_data2$steps,na.rm=T)
-median(raw_data2$steps,na.rm=T)
-
+Mean and median do increase with the applied method of imputation. A possible explanation is 
+the skewed distribution of the values.
 
 ##Are there differences in activity patterns between weekdays and weekends?
-#date als Datum definieren
-raw_data2$weekday=ifelse(raw_data2$weekdays %in% c("Sunday","Saturday"),"weekend","weekday")
 
+The function weekdays() is used to create a new variable indicating weather a date is on a weekday
+or weekend.
 
-plot(result1$steps,type="l")
+```{r}
+data2$weekday=ifelse(weekdays(data2$date) %in% c("Samstag","Sonntag"),"weekend","weekday")
+```
 
+The mean of steps taken by the individual is aggregated on a per interval and weekday-category.
+The variables of the resulting table are then renamed.
+
+```{r}
+result5=aggregate(data2$steps,by=list(data2$weekday,data2$interval),mean,na.rm=T)
+dimnames(result5)[[2]]=c("weekday","interval","steps")
+```
+
+The library ggplot2 is loaded to create the following plot.
+```{r}
+library(ggplot2)
+```
+
+The plot is then created for each interval and the two weekday categories.
+```{r}
+qplot(interval,steps,data=result5,geom="line",facets=weekday~.)
+```
+The weekdays activity pattern differs from the weekend pattern, as there is a morning peak, while
+on weekends the activity seems to be distributed more equally across the day.
+
+The library knitr is loaded to create the markdown document.
+```{r}
 library(knitr)
+```
+The markdown document is created.
 
-
+```{r}
 knit2html("C:/Users/Christoph Thommen/RepData_PeerAssessment1/PA1.Rmd")
+```
