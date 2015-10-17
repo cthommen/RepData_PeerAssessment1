@@ -2,12 +2,10 @@ COURSERA-Reproducible Research Course Project 1
 ===============================================
 
 Name: Christoph Thommen
-
 Date: 17.10.2015
-
 Data: The dataset contains information about the number of steps taken by 
-an individual collected during October and November 2012 in a 5 minute 
-interval. The following variables are collected:
+an individual collected during October and November 2012 in a 5 minute interval.
+The following variables are collected:
 steps: Number of steps taking in a 5-minute interval (missing values are coded as NA)
 date: The date on which the measurement was taken in YYYY-MM-DD format
 interval: Identifier for the 5-minute interval in which measurement was taken
@@ -16,62 +14,125 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 
 ##Loading and preprocessing the data
 
-First of all the data is loaded.
 
-```{r}
-data = read.csv("activity.csv")
+```r
+raw_data = read.csv("activity.csv")
 ```
 
-The data is then preprocessed such that the variable date appears in the date-format.
-
-```{r}
-data$date=strptime(data$date,"%Y-%m-%d")
+```
+## Warning: kann Datei 'activity.csv' nicht öffnen: No such file or directory
+```
 
 ```
+## Error: kann Verbindung nicht öffnen
+```
+
+
+
+```r
+raw_data$date = as.date(raw_data$date)
+```
+
+```
+## Error: konnte Funktion "as.date" nicht finden
+```
+
+#stimmt nicht -> checken
 
 ##What is mean total number of steps taken per day?
 
-The mean of steps taken by the individual is aggregated on a daily base, with the aggregate function.
-The variables of the resulting table are then renamed.
 
-```{r}
-result1=aggregate(raw_data$steps,by=list(raw_data$date),mean)
-dimnames(result1)[[2]]=c("date","steps")
+```r
+result1 = aggregate(raw_data$steps, by = list(raw_data$date), sum)
+dimnames(result1)[[2]] = c("date", "steps")
 ```
 
-```{r}
+
+
+```r
 hist(result1$steps)
-hist (analysis_data$Global_active_power, col="red",ylab="Frequency",xlab="Global Active Power (kilowatts)",main="Global Active Power")
-
 ```
 
-```{r}
-mean(result1$steps,na.rm=T)
-median(result1$steps,na.rm=T)
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
+
+
+
+```r
+mean(result1$steps, na.rm = T)
 ```
+
+```
+## [1] 10766
+```
+
+```r
+median(result1$steps, na.rm = T)
+```
+
+```
+## [1] 10765
+```
+
 #What is the average daily activity pattern?
 
-```{r}
-plot(result1$steps,type="l")
+
+```r
+plot(result1$steps, type = "l")
 ```
 
-```{r}
-result1[max(result1$steps,na.rm=T),]$date
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
+
+
+
+```r
+result1[max(result1$steps, na.rm = T), ]$date
 ```
+
+```
+## [1] <NA>
+## 61 Levels: 2012-10-01 2012-10-02 2012-10-03 2012-10-04 ... 2012-11-30
+```
+
 #checken -> stimmt nicht
 
 ##Imputing missing values
 
-```{r}
-table(is.na(raw_data$steps)==T)
-table(is.na(raw_data==T))
+
+```r
+table(is.na(raw_data$steps) == T)
 ```
 
-```{r}
-result2=aggregate(raw_data$steps,by=list(raw_data$interval),mean,na.rm=T)
-result2$steps=round(result2$steps,0)
-dimnames(result2)[[2]]=c("interval","steps")
 ```
+## 
+## FALSE  TRUE 
+## 15264  2304
+```
+
+```r
+table(is.na(raw_data == T))
+```
+
+```
+## 
+## FALSE  TRUE 
+## 50400  2304
+```
+
+
+
+```r
+result2 = aggregate(raw_data$steps, by = list(raw_data$interval), mean, na.rm = T)
+result2$steps = round(result2$steps, 0)
+```
+
+```
+## Error: Nicht-numerisches Argument für mathematische Funktion
+```
+
+```r
+dimnames(result2)[[2]] = c("interval", "steps")
+```
+
 
 raw_data_imp=raw_data[is.na(raw_data$steps)==T,]
 #raw_data_imp[raw_data_imp$interval==result2$interval,]$steps=result2[raw_data_imp$interval==result2$interval,]$steps
@@ -98,7 +159,5 @@ raw_data2$weekday=ifelse(raw_data2$weekdays %in% c("Sunday","Saturday"),"weekend
 
 plot(result1$steps,type="l")
 
-library(knitr)
 
-
-knit2html("C:/Users/Christoph Thommen/RepData_PeerAssessment1/PA1.Rmd")
+knit2html("PA1.Rmd")
