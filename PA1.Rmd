@@ -53,8 +53,14 @@ hist(result1$steps,ylab="Frequency",xlab="Total number of steps per day",
 main="Total number of steps per day")
 ```
 
-The mean of the total number of steps taken is equal to ```{r} mean(result1$steps,na.rm=T)```
-,the median is equal to ```{r} median(result1$steps,na.rm=T)```
+The mean of the total number of steps taken is equal to 
+
+```{r} print(mean(result1$steps,na.rm=T))```
+
+,the median is equal to 
+
+```{r} median(result1$steps,na.rm=T)```
+
 
 ##What is the average daily activity pattern?
 
@@ -168,5 +174,5 @@ library(knitr)
 The markdown document is created.
 
 ```{r}
-knit2html("C:/Users/Christoph Thommen/RepData_PeerAssessment1/PA1.Rmd")
+knit2html("C:/Users/Christoph Thommen/Documents/PA1.Rmd")
 ```

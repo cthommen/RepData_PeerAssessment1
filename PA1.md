@@ -25,14 +25,6 @@ First of all the data is loaded.
 data = read.csv("activity.csv")
 ```
 
-```
-## Warning: kann Datei 'activity.csv' nicht öffnen: No such file or directory
-```
-
-```
-## Error: kann Verbindung nicht öffnen
-```
-
 
 The data is then preprocessed such that the variable date appears in the 
 date-format.
@@ -138,8 +130,14 @@ hist(result1$steps, ylab = "Frequency", xlab = "Total number of steps per day",
 ![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
 
 
-The mean of the total number of steps taken is equal to ```{r} mean(result1$steps,na.rm=T)```
-,the median is equal to ```{r} median(result1$steps,na.rm=T)```
+The mean of the total number of steps taken is equal to 
+
+```{r} print(mean(result1$steps,na.rm=T))```
+
+,the median is equal to 
+
+```{r} median(result1$steps,na.rm=T)```
+
 
 ##What is the average daily activity pattern?
 
@@ -290,13 +288,13 @@ The markdown document is created.
 
 
 ```r
-knit2html("C:/Users/Christoph Thommen/RepData_PeerAssessment1/PA1.Rmd")
+knit2html("C:/Users/Christoph Thommen/Documents/PA1.Rmd")
 ```
 
 ```
 ## 
 ## 
-## processing file: C:/Users/Christoph Thommen/RepData_PeerAssessment1/PA1.Rmd
+## processing file: C:/Users/Christoph Thommen/Documents/PA1.Rmd
 ```
 
 ```
